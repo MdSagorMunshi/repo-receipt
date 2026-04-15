@@ -9,7 +9,6 @@ import { sampleRepoData } from "@/lib/sample-data";
 import type { RepoData } from "@/lib/types";
 
 export const revalidate = 86400;
-const githubRepoUrl = "https://github.com/MdSagorMunshi/repo-receipt";
 
 const exampleRepos = [
   { owner: "torvalds", repo: "linux" },
@@ -64,16 +63,6 @@ export default async function HomePage() {
               <Link href="/about" className="underline decoration-[var(--text-faint)] underline-offset-4">
                 About the process
               </Link>
-            </div>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <a
-                href={githubRepoUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="fine-link px-5"
-              >
-                Give a star on GitHub
-              </a>
             </div>
           </div>
 

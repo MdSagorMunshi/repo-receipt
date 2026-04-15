@@ -34,7 +34,7 @@ export default function OfflinePage() {
             <p>What to do next:</p>
             <p className="text-[var(--text-muted)]">
               Reconnect, refresh the page, and request the repository again. If the problem persists, check
-              whether GitHub or your network path is rate-limited.
+              whether GitHub or your network path is temporarily unavailable.
             </p>
           </div>
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">

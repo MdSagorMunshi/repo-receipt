@@ -43,7 +43,7 @@ export function SiteFooter() {
         </div>
         <div className="flex flex-col gap-2 border-t border-[var(--text-faint)] pt-5 font-mono text-[11px] text-[var(--text-muted)] md:flex-row md:items-center md:justify-between">
           <p>Every repo has a receipt.</p>
-          <p>Public embeds stay open. Interactive downloads are signed and rate-limited.</p>
+          <p>Public embeds stay open. Interactive downloads are signed for app use.</p>
         </div>
       </div>
     </footer>
