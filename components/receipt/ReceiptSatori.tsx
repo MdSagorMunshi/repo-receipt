@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 import { buildReceiptViewModel } from "@/lib/receipt";
 import { getSiteHost } from "@/lib/site";
 import { resolveTokens } from "@/lib/tokens";
@@ -92,7 +94,36 @@ export function ReceiptSatori({ data, qrDataUri, theme = "light" }: ReceiptSator
               }}
             >
               <div style={{ width: 92 }}>{language.name}</div>
-              <div style={{ flex: 1, textAlign: "center", color: tokens.inkMuted }}>{language.bar}</div>
+              <div
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <div
+                  style={{
+                    width: 88,
+                    height: 8,
+                    borderWidth: 1,
+                    borderStyle: "solid",
+                    borderColor: tokens.inkFaint,
+                    overflow: "hidden",
+                    display: "flex",
+                    justifyContent: "flex-start",
+                    alignItems: "stretch",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: `${language.fillPercentage}%`,
+                      height: "100%",
+                      backgroundColor: tokens.inkMuted,
+                    }}
+                  />
+                </div>
+              </div>
               <div style={{ width: 48, textAlign: "right" }}>{language.percentageLabel}</div>
             </div>
           ))
@@ -159,13 +190,14 @@ export function ReceiptSatori({ data, qrDataUri, theme = "light" }: ReceiptSator
             borderWidth: 1,
             borderColor: tokens.stamp,
             borderStyle: "solid",
-            backgroundImage: `url(${qrDataUri})`,
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
-            backgroundSize: "116px 116px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
             marginBottom: 16,
           }}
-        />
+        >
+          <img src={qrDataUri} width="116" height="116" alt="" />
+        </div>
         <div style={{ fontSize: 11, color: tokens.inkMuted }}>{siteHost}</div>
       </div>
     </div>

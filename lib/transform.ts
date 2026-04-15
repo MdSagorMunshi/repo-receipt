@@ -1,7 +1,6 @@
 import type { LanguageBarEntry, LanguageEntry, RepoAge } from "@/lib/types";
 
 const REPO_SEGMENT = /^[a-zA-Z0-9._-]+$/;
-const BAR_WIDTH = 20;
 
 export function parseRepoUrl(input: string): { owner: string; repo: string } | null {
   const trimmed = input.trim();
@@ -71,10 +70,9 @@ export function formatReceiptNumber(repoId: number): string {
 
 export function buildLanguageBars(languages: LanguageEntry[]): LanguageBarEntry[] {
   return languages.map((language) => {
-    const filled = Math.max(0, Math.min(BAR_WIDTH, Math.round((language.percentage / 100) * BAR_WIDTH)));
     return {
       ...language,
-      bar: `${"█".repeat(filled)}${"░".repeat(BAR_WIDTH - filled)}`,
+      fillPercentage: Math.max(0, Math.min(100, language.percentage)),
       percentageLabel: `${language.percentage.toFixed(1)}%`,
     };
   });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { startTransition, useState } from "react";
 
 import { parseRepoUrl } from "@/lib/transform";
 
@@ -30,7 +30,11 @@ export function UrlInputForm({
     }
 
     setError("");
-    router.push(`/r/${parsed.owner}/${parsed.repo}`);
+    const target = `/r/${encodeURIComponent(parsed.owner)}/${encodeURIComponent(parsed.repo)}`;
+    startTransition(() => {
+      router.push(target);
+      router.refresh();
+    });
   }
 
   return (

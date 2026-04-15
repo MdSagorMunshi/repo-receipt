@@ -1,4 +1,4 @@
-import Image from "next/image";
+/* eslint-disable @next/next/no-img-element */
 
 import { buildReceiptViewModel } from "@/lib/receipt";
 import { createQrDataUri } from "@/lib/qr";
@@ -53,7 +53,14 @@ export async function ReceiptCard({ data, className = "" }: ReceiptCardProps) {
             receipt.languages.map((language) => (
               <div key={language.name} className="flex items-center justify-between gap-3 font-mono text-[11px]">
                 <span className="min-w-0 flex-[0.9] truncate">{language.name}</span>
-                <span className="flex-1 text-center text-[var(--text-muted)]">{language.bar}</span>
+                <span className="flex flex-1 items-center justify-center">
+                  <span className="h-[8px] w-[88px] overflow-hidden border border-[var(--text-faint)]">
+                    <span
+                      className="block h-full bg-[var(--text-muted)]"
+                      style={{ width: `${language.fillPercentage}%` }}
+                    />
+                  </span>
+                </span>
                 <span className="w-12 text-right">{language.percentageLabel}</span>
               </div>
             ))
@@ -100,7 +107,7 @@ export async function ReceiptCard({ data, className = "" }: ReceiptCardProps) {
           <p className="font-display text-[22px] italic tracking-[0.02em]">THANK YOU FOR OPEN SOURCING</p>
           <div className="mt-5 flex justify-center">
             <div className="border border-[var(--cr-stamp)] p-2">
-              <Image src={qrDataUri} alt="" width={116} height={116} unoptimized />
+              <img src={qrDataUri} alt="" width={116} height={116} />
             </div>
           </div>
           <p className="mt-4 font-mono text-[11px] text-[var(--text-muted)]">{siteHost}</p>

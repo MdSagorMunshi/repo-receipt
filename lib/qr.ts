@@ -1,8 +1,7 @@
 import QRCode from "qrcode";
 
 export async function createQrDataUri(input: string) {
-  const svg = await QRCode.toString(input, {
-    type: "svg",
+  return QRCode.toDataURL(input, {
     margin: 0,
     width: 116,
     color: {
@@ -10,6 +9,4 @@ export async function createQrDataUri(input: string) {
       light: "#FDFAF4",
     },
   });
-
-  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 }

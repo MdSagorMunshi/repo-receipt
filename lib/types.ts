@@ -7,7 +7,7 @@ export interface LanguageEntry {
 }
 
 export interface LanguageBarEntry extends LanguageEntry {
-  bar: string;
+  fillPercentage: number;
   percentageLabel: string;
 }
 

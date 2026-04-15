@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element */
+
 import { useState } from "react";
 
 import { getAppName, getSiteUrl } from "@/lib/site";
@@ -49,8 +51,10 @@ function MarkdownIcon() {
 
 export function ActionPanel({ owner, repo, stars, commitCount, repoAgeLabel }: ActionPanelProps) {
   const [copied, setCopied] = useState<string | null>(null);
+  const [downloadState, setDownloadState] = useState<"idle" | "loading" | "error">("idle");
   const receiptPath = `/r/${owner}/${repo}`;
   const imagePath = `/api/generate/${owner}/${repo}`;
+  const downloadPath = process.env.NODE_ENV === "development" ? `${imagePath}?fresh=1` : imagePath;
   const appName = getAppName();
   const siteUrl = getSiteUrl();
 
@@ -65,14 +69,28 @@ export function ActionPanel({ owner, repo, stars, commitCount, repoAgeLabel }: A
   }
 
   async function handleDownload() {
-    const response = await fetch(imagePath);
-    const blob = await response.blob();
-    const href = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = href;
-    anchor.download = `${owner}-${repo}-receipt.png`;
-    anchor.click();
-    URL.revokeObjectURL(href);
+    try {
+      setDownloadState("loading");
+      const response = await fetch(downloadPath, { cache: "no-store" });
+
+      if (!response.ok) {
+        throw new Error(`Download failed with status ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const href = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = href;
+      anchor.download = `${owner}-${repo}-receipt.png`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.setTimeout(() => URL.revokeObjectURL(href), 1000);
+      setDownloadState("idle");
+    } catch {
+      setDownloadState("error");
+      window.setTimeout(() => setDownloadState("idle"), 2200);
+    }
   }
 
   function shareOnX() {
@@ -88,7 +106,13 @@ export function ActionPanel({ owner, repo, stars, commitCount, repoAgeLabel }: A
   return (
     <div className="flex w-full max-w-[420px] flex-col gap-2.5">
       <button type="button" className="panel-button" onClick={handleDownload}>
-        <span>Download PNG</span>
+        <span>
+          {downloadState === "loading"
+            ? "Preparing PNG"
+            : downloadState === "error"
+              ? "PNG Failed"
+              : "Download PNG"}
+        </span>
         <DownloadIcon />
       </button>
       <button type="button" className="panel-button" onClick={() => copyText("link", absoluteUrl(receiptPath))}>

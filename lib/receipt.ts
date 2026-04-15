@@ -12,7 +12,7 @@ export interface ReceiptViewModel {
   generatedAt: string;
   description: string;
   metrics: ReceiptRow[];
-  languages: Array<{ name: string; bar: string; percentageLabel: string }>;
+  languages: Array<{ name: string; fillPercentage: number; percentageLabel: string }>;
   activity: ReceiptRow[];
   footerTopics: string[];
   subtotalLabel: string;
@@ -27,14 +27,14 @@ export function buildReceiptViewModel(data: RepoData): ReceiptViewModel {
     generatedAt,
     description: data.description,
     metrics: [
-      { label: "STARS", value: `${formatCount(data.stars)} ★` },
+      { label: "STARS", value: formatCount(data.stars) },
       { label: "FORKS", value: formatCount(data.forks) },
       { label: "WATCHERS", value: formatCount(data.watchers) },
       { label: "OPEN ISSUES", value: formatCount(data.openIssues), tone: "danger" },
     ],
     languages: buildLanguageBars(data.languages).map((language) => ({
       name: language.name,
-      bar: language.bar,
+      fillPercentage: language.fillPercentage,
       percentageLabel: language.percentageLabel,
     })),
     activity: [
@@ -46,7 +46,7 @@ export function buildReceiptViewModel(data: RepoData): ReceiptViewModel {
       { label: "PEAK DAY", value: data.peakDay ?? "—" },
     ],
     footerTopics: data.topics.slice(0, 5).map((topic) => `#${topic}`),
-    subtotalLabel: `SUBTOTAL ${formatCount(data.stars)} ★`,
+    subtotalLabel: `SUBTOTAL ${formatCount(data.stars)}`,
     openIssuesLabel: `OPEN ISSUES ${formatCount(data.openIssues)}`,
   };
 }
