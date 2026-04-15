@@ -105,6 +105,18 @@ export default async function ReceiptPage({ params }: ReceiptPageProps) {
         );
       }
 
+      if (error.status >= 500) {
+        return (
+          <div className="min-h-screen">
+            <SiteHeader />
+            <ErrorReceipt
+              repoLabel={`${owner}/${repo}`}
+              message="GitHub returned an unexpected response while assembling this receipt. The repository may still be public, but one of the upstream data calls failed. Try again in a moment."
+            />
+          </div>
+        );
+      }
+
       return (
         <div className="min-h-screen">
           <SiteHeader />

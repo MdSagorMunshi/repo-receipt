@@ -31,12 +31,9 @@ interface RepositoryGraphQLNode {
     | {
         target:
           | {
-              historyLatest: {
+              committedDate: string;
+              historySummary: {
                 totalCount: number;
-                edges: Array<{ node: { committedDate: string } }>;
-              };
-              historyFirst: {
-                edges: Array<{ node: { committedDate: string } }>;
               };
             }
           | null;
@@ -235,12 +232,9 @@ export async function fetchRepoData(owner: string, repo: string): Promise<RepoDa
         defaultBranchRef {
           target {
             ... on Commit {
-              historyLatest: history(first: 1) {
+              committedDate
+              historySummary: history(first: 1) {
                 totalCount
-                edges { node { committedDate } }
-              }
-              historyFirst: history(last: 1) {
-                edges { node { committedDate } }
               }
             }
           }
@@ -273,11 +267,9 @@ export async function fetchRepoData(owner: string, repo: string): Promise<RepoDa
       commitActivityResponse.status === 202 ? null : ((await commitActivityResponse.json()) as CommitWeek[]);
     const contributorsJson = (await contributorsResponse.json()) as Array<unknown>;
 
-    const firstCommit =
-      repository.defaultBranchRef?.target?.historyFirst.edges[0]?.node.committedDate ?? null;
-    const latestCommit =
-      repository.defaultBranchRef?.target?.historyLatest.edges[0]?.node.committedDate ?? null;
-    const totalCommits = repository.defaultBranchRef?.target?.historyLatest.totalCount ?? 0;
+    const latestCommit = repository.defaultBranchRef?.target?.committedDate ?? null;
+    const totalCommits = repository.defaultBranchRef?.target?.historySummary.totalCount ?? 0;
+    const firstCommit = totalCommits > 0 ? repository.createdAt : null;
 
     return {
       name: repository.name,
