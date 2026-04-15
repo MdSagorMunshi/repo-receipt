@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "app/api/generate/[owner]/[repo]/route.ts": {
+      "runtime": "nodejs20.x"
+    }
+  }
+}

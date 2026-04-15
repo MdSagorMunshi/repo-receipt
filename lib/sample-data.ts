@@ -1,0 +1,30 @@
+import type { RepoData } from "@/lib/types";
+
+export const sampleRepoData: RepoData = {
+  name: "react",
+  owner: "facebook",
+  fullName: "facebook/react",
+  description: "The library for web and native user interfaces.",
+  repoUrl: "https://github.com/facebook/react",
+  stars: 235400,
+  forks: 48600,
+  watchers: 6700,
+  openIssues: 1050,
+  license: "MIT License",
+  topics: ["javascript", "library", "react", "frontend", "ui"],
+  languages: [
+    { name: "JavaScript", percentage: 59.4, bytes: 594000 },
+    { name: "TypeScript", percentage: 20.2, bytes: 202000 },
+    { name: "HTML", percentage: 9.4, bytes: 94000 },
+    { name: "CSS", percentage: 7.5, bytes: 75000 },
+    { name: "Other", percentage: 3.5, bytes: 35000 },
+  ],
+  firstCommit: "2013-05-24T16:15:54Z",
+  latestCommit: "2026-04-14T13:10:00Z",
+  totalCommits: 19240,
+  contributors: 1692,
+  peakDay: "Wednesday",
+  repoAge: { years: 12, months: 10 },
+  repoId: 10270250,
+  createdAt: "2013-05-24T16:15:54Z",
+};

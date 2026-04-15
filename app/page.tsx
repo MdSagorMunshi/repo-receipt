@@ -1,64 +1,97 @@
-import Image from "next/image";
+import Link from "next/link";
 
-export default function Home() {
+import { ReceiptThumbnail } from "@/components/ReceiptThumbnail";
+import { SiteHeader } from "@/components/SiteHeader";
+import { UrlInputForm } from "@/components/UrlInputForm";
+import { ReceiptCard } from "@/components/receipt/ReceiptCard";
+import { fetchRepoData } from "@/lib/github";
+import { sampleRepoData } from "@/lib/sample-data";
+import type { RepoData } from "@/lib/types";
+
+export const revalidate = 86400;
+
+const exampleRepos = [
+  { owner: "torvalds", repo: "linux" },
+  { owner: "microsoft", repo: "vscode" },
+  { owner: "vercel", repo: "next.js" },
+] as const;
+
+async function getRepoOrFallback(owner: string, repo: string, fallback: RepoData) {
+  try {
+    return await fetchRepoData(owner, repo);
+  } catch {
+    return {
+      ...fallback,
+      owner,
+      name: repo,
+      fullName: `${owner}/${repo}`,
+      repoUrl: `https://github.com/${owner}/${repo}`,
+    };
+  }
+}
+
+export default async function HomePage() {
+  const heroReceipt = await getRepoOrFallback("facebook", "react", sampleRepoData);
+  const examples = await Promise.all(
+    exampleRepos.map((entry) => getRepoOrFallback(entry.owner, entry.repo, sampleRepoData)),
+  );
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <div className="min-h-screen">
+      <SiteHeader />
+      <main className="mx-auto flex w-full max-w-7xl flex-col px-4 pb-16 sm:px-6 lg:px-8">
+        <section className="grid items-center gap-14 py-8 lg:grid-cols-[minmax(0,1fr)_560px] lg:py-16">
+          <div className="order-2 lg:order-1">
+            <p className="font-mono text-xs uppercase tracking-[0.3em] text-[var(--text-muted)]">
+              Every repo has a receipt.
+            </p>
+            <h1 className="mt-5 max-w-3xl font-display text-5xl leading-[0.95] tracking-[-0.05em] sm:text-6xl lg:text-7xl">
+              Every repo has a receipt.
+            </h1>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--text-muted)]">
+              Paste any public GitHub repository and get a print-worthy record of its stars, commits,
+              languages, contributors, age, and open-source footprint.
+            </p>
+            <div className="mt-10 max-w-3xl">
+              <UrlInputForm />
+            </div>
+            <div className="mt-10 flex items-center gap-4 font-mono text-xs text-[var(--text-muted)]">
+              <Link href="/gallery" className="underline decoration-[var(--text-faint)] underline-offset-4">
+                Most decorated repos
+              </Link>
+              <span>·</span>
+              <Link href="/about" className="underline decoration-[var(--text-faint)] underline-offset-4">
+                About the process
+              </Link>
+            </div>
+          </div>
+
+          <div className="order-1 flex justify-center lg:order-2 lg:justify-end">
+            <div className="w-full max-w-[540px]" style={{ transform: "rotate(3deg)" }}>
+              <ReceiptCard data={heroReceipt} />
+            </div>
+          </div>
+        </section>
+
+        <section className="mt-10">
+          <div className="mb-5 flex items-center justify-between">
+            <p className="font-display text-2xl italic">Three examples to start with</p>
+            <p className="hidden font-mono text-xs uppercase tracking-[0.2em] text-[var(--text-muted)] sm:block">
+              Scroll the paper trail
+            </p>
+          </div>
+          <div className="thin-scrollbar flex gap-4 overflow-x-auto pb-4">
+            {examples.map((repo) => (
+              <div key={repo.fullName} className="min-w-[210px] max-w-[210px] flex-none">
+                <ReceiptThumbnail
+                  href={`/r/${repo.owner}/${repo.name}`}
+                  data={repo}
+                  label={repo.fullName}
+                />
+              </div>
+            ))}
+          </div>
+        </section>
       </main>
     </div>
   );
