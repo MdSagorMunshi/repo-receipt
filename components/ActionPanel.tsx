@@ -1,7 +1,5 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
-
 import { useState } from "react";
 
 import { getAppName, getSiteUrl } from "@/lib/site";

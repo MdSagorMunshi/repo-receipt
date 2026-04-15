@@ -53,50 +53,19 @@ export async function generateMetadata({ params }: ReceiptPageProps): Promise<Me
 export default async function ReceiptPage({ params }: ReceiptPageProps) {
   const { owner, repo } = await params;
   const siteUrl = getSiteUrl();
+  let data: Awaited<ReturnType<typeof fetchRepoData>> | null = null;
+  let fetchError: unknown = null;
 
   try {
-    const data = await fetchRepoData(owner, repo);
-    const imageUrl = new URL(`/api/generate/${owner}/${repo}`, siteUrl).toString();
-    const receiptUrl = new URL(`/r/${owner}/${repo}`, siteUrl).toString();
-    const downloadPath = createProtectedReceiptPath(owner, repo);
-    const embedCode = `[![repo-receipt](${imageUrl})](${receiptUrl})`;
-
-    return (
-      <div className="min-h-screen">
-        <SiteHeader />
-        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <div className="grid gap-10 xl:grid-cols-[480px_minmax(320px,420px)] xl:justify-center">
-            <ReceiptCard data={data} />
-            <div className="flex flex-col gap-6">
-              <ActionPanel
-                owner={owner}
-                repo={repo}
-                stars={data.stars}
-                commitCount={data.totalCommits}
-                repoAgeLabel={formatAgeLabel(data.repoAge)}
-                downloadPath={downloadPath}
-              />
-              <div className="border border-[var(--text-faint)] p-4">
-                <p className="font-display text-xl italic">README Embed</p>
-                <pre className="mt-4 overflow-x-auto whitespace-pre-wrap border border-[var(--text-faint)] bg-[var(--surface-bg)] p-3 font-mono text-[11px] leading-5 text-[var(--text-muted)]">
-                  {embedCode}
-                </pre>
-              </div>
-              <div className="border border-[var(--text-faint)] p-4">
-                <p className="font-display text-xl italic">Generate another</p>
-                <div className="mt-4">
-                  <UrlInputForm initialValue={`${owner}/${repo}`} compact />
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
-    );
+    data = await fetchRepoData(owner, repo);
   } catch (error) {
-    if (error instanceof RepoFetchError) {
-      if (error.status === 429) {
-        const resetLabel = error.resetAt ? ` Rate limit resets at ${error.resetAt}.` : "";
+    fetchError = error;
+  }
+
+  if (fetchError) {
+    if (fetchError instanceof RepoFetchError) {
+      if (fetchError.status === 429) {
+        const resetLabel = fetchError.resetAt ? ` Rate limit resets at ${fetchError.resetAt}.` : "";
         return (
           <div className="min-h-screen">
             <SiteHeader />
@@ -108,7 +77,7 @@ export default async function ReceiptPage({ params }: ReceiptPageProps) {
         );
       }
 
-      if (error.status >= 500) {
+      if (fetchError.status >= 500) {
         return (
           <div className="min-h-screen">
             <SiteHeader />
@@ -141,4 +110,70 @@ export default async function ReceiptPage({ params }: ReceiptPageProps) {
       </div>
     );
   }
+
+  if (!data) {
+    return (
+      <div className="min-h-screen">
+        <SiteHeader />
+        <ErrorReceipt
+          repoLabel={`${owner}/${repo}`}
+          message="The receipt press hit a fault while rendering. Try again in a moment."
+        />
+      </div>
+    );
+  }
+
+  const imageUrl = new URL(`/api/generate/${owner}/${repo}`, siteUrl).toString();
+  const receiptUrl = new URL(`/r/${owner}/${repo}`, siteUrl).toString();
+  const downloadPath = createProtectedReceiptPath(owner, repo);
+  const embedCode = `[![repo-receipt](${imageUrl})](${receiptUrl})`;
+
+  return <ReceiptPageContent data={data} owner={owner} repo={repo} embedCode={embedCode} downloadPath={downloadPath} />;
+}
+
+function ReceiptPageContent({
+  data,
+  owner,
+  repo,
+  embedCode,
+  downloadPath,
+}: {
+  data: Awaited<ReturnType<typeof fetchRepoData>>;
+  owner: string;
+  repo: string;
+  embedCode: string;
+  downloadPath: string;
+}) {
+  return (
+    <div className="min-h-screen">
+      <SiteHeader />
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="grid gap-10 xl:grid-cols-[480px_minmax(320px,420px)] xl:justify-center">
+          <ReceiptCard data={data} />
+          <div className="flex flex-col gap-6">
+            <ActionPanel
+              owner={owner}
+              repo={repo}
+              stars={data.stars}
+              commitCount={data.totalCommits}
+              repoAgeLabel={formatAgeLabel(data.repoAge)}
+              downloadPath={downloadPath}
+            />
+            <div className="border border-[var(--text-faint)] p-4">
+              <p className="font-display text-xl italic">README Embed</p>
+              <pre className="mt-4 overflow-x-auto whitespace-pre-wrap border border-[var(--text-faint)] bg-[var(--surface-bg)] p-3 font-mono text-[11px] leading-5 text-[var(--text-muted)]">
+                {embedCode}
+              </pre>
+            </div>
+            <div className="border border-[var(--text-faint)] p-4">
+              <p className="font-display text-xl italic">Generate another</p>
+              <div className="mt-4">
+                <UrlInputForm initialValue={`${owner}/${repo}`} compact />
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
 }
