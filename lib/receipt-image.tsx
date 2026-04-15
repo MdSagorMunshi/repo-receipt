@@ -1,11 +1,12 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
+import React from "react";
 import satori from "satori";
 import sharp from "sharp";
 
 import { ReceiptSatori } from "@/components/receipt/ReceiptSatori";
-import { createQrDataUri } from "@/lib/qr";
+import { createQrMatrix } from "@/lib/qr";
 import type { RepoData } from "@/lib/types";
 
 let fontCache:
@@ -50,9 +51,12 @@ async function loadReceiptFonts() {
 }
 
 export async function renderReceiptPng(data: RepoData) {
-  const [fonts, qrDataUri] = await Promise.all([loadReceiptFonts(), createQrDataUri(data.repoUrl)]);
+  const [fonts, qrMatrix] = await Promise.all([
+    loadReceiptFonts(),
+    Promise.resolve(createQrMatrix(data.repoUrl)),
+  ]);
 
-  const svg = await satori(<ReceiptSatori data={data} qrDataUri={qrDataUri} />, {
+  const svg = await satori(<ReceiptSatori data={data} qrMatrix={qrMatrix} />, {
     width: 480,
     height: 1152,
     fonts: [

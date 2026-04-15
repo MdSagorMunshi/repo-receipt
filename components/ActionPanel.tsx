@@ -12,6 +12,7 @@ interface ActionPanelProps {
   stars: number;
   commitCount: number;
   repoAgeLabel: string;
+  downloadPath: string;
 }
 
 function DownloadIcon() {
@@ -49,12 +50,11 @@ function MarkdownIcon() {
   );
 }
 
-export function ActionPanel({ owner, repo, stars, commitCount, repoAgeLabel }: ActionPanelProps) {
+export function ActionPanel({ owner, repo, stars, commitCount, repoAgeLabel, downloadPath }: ActionPanelProps) {
   const [copied, setCopied] = useState<string | null>(null);
   const [downloadState, setDownloadState] = useState<"idle" | "loading" | "error">("idle");
   const receiptPath = `/r/${owner}/${repo}`;
   const imagePath = `/api/generate/${owner}/${repo}`;
-  const downloadPath = process.env.NODE_ENV === "development" ? `${imagePath}?fresh=1` : imagePath;
   const appName = getAppName();
   const siteUrl = getSiteUrl();
 

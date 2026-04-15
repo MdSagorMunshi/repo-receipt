@@ -45,18 +45,31 @@ export default function AboutPage() {
             rendering pipeline, the design tokens, and the exact component structure that powers the
             generated image.
           </p>
-          <p className="mt-8 font-mono text-sm text-[var(--text-muted)]">
-            Source:{" "}
-            <Link href="https://github.com/your-github-username/repo-receipt" className="underline underline-offset-4">
-              github.com/your-github-username/repo-receipt
-            </Link>
-          </p>
-          <p className="mt-4 font-mono text-sm text-[var(--text-muted)]">
-            Support:{" "}
-            <a href="mailto:ryn@disr.it" className="underline underline-offset-4">
-              ryn@disr.it
-            </a>
-          </p>
+          <h2 className="mt-12 font-display text-3xl">Developer</h2>
+          <div className="mt-4 space-y-4 text-[var(--text-muted)]">
+            <p>
+              <span className="text-[var(--text-primary)]">Ryan Shelby</span> maintains the product direction,
+              interface, and release quality for {appName}.
+            </p>
+            <p className="font-mono text-sm">
+              GitHub:{" "}
+              <Link href="https://github.com/MdSagorMunshi" className="underline underline-offset-4">
+                github.com/MdSagorMunshi
+              </Link>
+            </p>
+            <p className="font-mono text-sm">
+              GitLab:{" "}
+              <Link href="https://gitlab.com/rynex" className="underline underline-offset-4">
+                gitlab.com/rynex
+              </Link>
+            </p>
+            <p className="font-mono text-sm">
+              Support:{" "}
+              <a href="mailto:ryn@disr.it" className="underline underline-offset-4">
+                ryn@disr.it
+              </a>
+            </p>
+          </div>
         </article>
       </main>
     </div>

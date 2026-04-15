@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { SiteFooter } from "@/components/SiteFooter";
 import { getAppName, getMetadataBase, getThemeStorageKey } from "@/lib/site";
 import "../styles/globals.css";
 
@@ -87,7 +88,12 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
       </head>
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className="min-h-screen antialiased">
+        <div className="flex min-h-screen flex-col">
+          <div className="flex-1">{children}</div>
+          <SiteFooter />
+        </div>
+      </body>
     </html>
   );
 }

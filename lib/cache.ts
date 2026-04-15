@@ -3,7 +3,7 @@ import { Redis } from "@upstash/redis";
 const CACHE_TTL = 60 * 60 * 24;
 let warned = false;
 
-function getRedisClient() {
+export function getRedisClient() {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 

@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { UrlInputForm } from "@/components/UrlInputForm";
 import { ErrorReceipt } from "@/components/receipt/ErrorReceipt";
 import { ReceiptCard } from "@/components/receipt/ReceiptCard";
+import { createProtectedReceiptPath } from "@/lib/api-signing";
 import { fetchRepoData, fetchRepoMetadata } from "@/lib/github";
 import { getAppName, getSiteUrl } from "@/lib/site";
 import { formatAgeLabel, truncateText } from "@/lib/transform";
@@ -57,6 +58,7 @@ export default async function ReceiptPage({ params }: ReceiptPageProps) {
     const data = await fetchRepoData(owner, repo);
     const imageUrl = new URL(`/api/generate/${owner}/${repo}`, siteUrl).toString();
     const receiptUrl = new URL(`/r/${owner}/${repo}`, siteUrl).toString();
+    const downloadPath = createProtectedReceiptPath(owner, repo);
     const embedCode = `[![repo-receipt](${imageUrl})](${receiptUrl})`;
 
     return (
@@ -72,6 +74,7 @@ export default async function ReceiptPage({ params }: ReceiptPageProps) {
                 stars={data.stars}
                 commitCount={data.totalCommits}
                 repoAgeLabel={formatAgeLabel(data.repoAge)}
+                downloadPath={downloadPath}
               />
               <div className="border border-[var(--text-faint)] p-4">
                 <p className="font-display text-xl italic">README Embed</p>

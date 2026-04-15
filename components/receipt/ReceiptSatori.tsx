@@ -1,5 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
+import React from "react";
 
+import type { QrMatrix } from "@/lib/qr";
 import { buildReceiptViewModel } from "@/lib/receipt";
 import { getSiteHost } from "@/lib/site";
 import { resolveTokens } from "@/lib/tokens";
@@ -8,14 +9,14 @@ import type { RepoData, ThemeMode } from "@/lib/types";
 
 interface ReceiptSatoriProps {
   data: RepoData;
-  qrDataUri: string;
+  qrMatrix: QrMatrix;
   theme?: ThemeMode;
 }
 
 const monoFamily = "JetBrains Mono";
 const displayFamily = "Playfair Display";
 
-export function ReceiptSatori({ data, qrDataUri, theme = "light" }: ReceiptSatoriProps) {
+export function ReceiptSatori({ data, qrMatrix, theme = "light" }: ReceiptSatoriProps) {
   const receipt = buildReceiptViewModel(data);
   const tokens = resolveTokens(theme);
   const siteHost = getSiteHost();
@@ -196,10 +197,53 @@ export function ReceiptSatori({ data, qrDataUri, theme = "light" }: ReceiptSator
             marginBottom: 16,
           }}
         >
-          <img src={qrDataUri} width="116" height="116" alt="" />
+          <SatoriQrCode matrix={qrMatrix} darkColor={tokens.ink} lightColor={tokens.paper} />
         </div>
         <div style={{ fontSize: 11, color: tokens.inkMuted }}>{siteHost}</div>
       </div>
+    </div>
+  );
+}
+
+function SatoriQrCode({
+  matrix,
+  darkColor,
+  lightColor,
+}: {
+  matrix: QrMatrix;
+  darkColor: string;
+  lightColor: string;
+}) {
+  return (
+    <div
+      style={{
+        width: 116,
+        height: 116,
+        display: "flex",
+        flexDirection: "column",
+        backgroundColor: lightColor,
+      }}
+    >
+      {matrix.cells.map((row, rowIndex) => (
+        <div
+          key={`qr-row-${rowIndex}`}
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            flex: 1,
+          }}
+        >
+          {row.map((cell, cellIndex) => (
+            <div
+              key={`qr-cell-${rowIndex}-${cellIndex}`}
+              style={{
+                flex: 1,
+                backgroundColor: cell ? darkColor : lightColor,
+              }}
+            />
+          ))}
+        </div>
+      ))}
     </div>
   );
 }
