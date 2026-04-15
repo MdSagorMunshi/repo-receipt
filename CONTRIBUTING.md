@@ -2,10 +2,10 @@
 
 ## Local development
 
-1. Install dependencies with `pnpm install`.
-2. Start the app with `pnpm dev`.
+1. Install dependencies with `bun install`.
+2. Start the app with `bun run dev`.
 3. Add `GITHUB_TOKEN` to `.env.local` if you want higher GitHub API limits.
-4. Run `pnpm typecheck`, `pnpm lint`, and `pnpm test:satori` before opening a pull request.
+4. Run `bun run typecheck`, `bun run lint`, and `bun run test:satori` before opening a pull request.
 
 ## Architecture
 

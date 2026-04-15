@@ -51,6 +51,12 @@ export default function AboutPage() {
               github.com/your-github-username/repo-receipt
             </Link>
           </p>
+          <p className="mt-4 font-mono text-sm text-[var(--text-muted)]">
+            Support:{" "}
+            <a href="mailto:ryn@disr.it" className="underline underline-offset-4">
+              ryn@disr.it
+            </a>
+          </p>
         </article>
       </main>
     </div>

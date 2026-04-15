@@ -1,0 +1,41 @@
+name: Feature Request
+description: Propose an improvement to repo-receipt
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the change you want, why it matters, and how it should behave.
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      placeholder: Short description of the feature
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or opportunity
+      placeholder: What limitation or use case is this solving?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      placeholder: Describe the product or technical change you want
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      placeholder: Optional alternatives or tradeoffs
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      placeholder: References, screenshots, or examples

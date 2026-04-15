@@ -3,7 +3,7 @@ import path from "node:path";
 
 const hookPath = path.join(process.cwd(), ".git", "hooks", "pre-commit");
 const hookBody = `#!/bin/sh
-pnpm typecheck
+bun run typecheck
 `;
 
 await mkdir(path.dirname(hookPath), { recursive: true });
