@@ -18,6 +18,7 @@ Create `.env.local` from `.env.example` and set:
 - `GITHUB_TOKEN`: recommended for higher GitHub API rate limits
 - `UPSTASH_REDIS_REST_URL`: optional Redis REST endpoint for image caching
 - `UPSTASH_REDIS_REST_TOKEN`: optional Redis REST token
+- `API_SIGNING_SECRET`: API signing token
 
 ## Install
 
