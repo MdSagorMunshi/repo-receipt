@@ -4,7 +4,7 @@
 
 **Every repo has a receipt.**
 
-[![Next.js](https://img.shields.io/badge/Next.js_15-000000?style=for-the-badge&logo=next.js&logoColor=green)](https://nextjs.org)
+[![Next.js](https://img.shields.io/badge/Next.js_16-000000?style=for-the-badge&logo=next.js&logoColor=green)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-1A1814?style=for-the-badge)](./LICENSE)
@@ -37,7 +37,7 @@ repo-receipt transforms any public GitHub repository into a shareable, print-sty
 
 | Layer | Technology |
 |---|---|
-| Framework | Next.js 15 App Router |
+| Framework | Next.js 16 App Router |
 | Language | TypeScript |
 | Styling | Tailwind CSS v4 |
 | Image Generation | Satori + sharp |
