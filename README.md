@@ -106,6 +106,7 @@ bun run test:satori # Satori renderer tests
 |---|---|
 | [BUILD.md](./BUILD.md) | Installation, build pipeline, hosting, and deployment notes |
 | [CONTRIBUTING.md](./CONTRIBUTING.md) | Contributor workflow, renderer constraints, and PR guidelines |
+| [ROADMAP.md](./ROADMAP.md) | V2 product roadmap, feature pillars, and release sequencing |
 
 ---
 
