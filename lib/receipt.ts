@@ -1,4 +1,5 @@
 import { buildLanguageBars, formatAgeLabel, formatCount, formatDateUtc, formatReceiptNumber, formatShortDate } from "@/lib/transform";
+import { deriveMilestones } from "@/lib/milestones";
 import type { ReceiptMode, RepoData } from "@/lib/types";
 
 export interface ReceiptRow {
@@ -12,6 +13,7 @@ export interface ReceiptViewModel {
   generatedAt: string;
   description: string;
   modeLabel: string;
+  milestones: string[];
   metrics: ReceiptRow[];
   languages: Array<{ name: string; fillPercentage: number; percentageLabel: string }>;
   activity: ReceiptRow[];
@@ -35,6 +37,7 @@ export function buildReceiptViewModel(data: RepoData, mode: ReceiptMode = "fine-
     generatedAt,
     description: data.description,
     modeLabel: mode.toUpperCase(),
+    milestones: deriveMilestones(data).map((milestone) => milestone.label),
     metrics: [
       { label: "STARS", value: formatCount(data.stars) },
       { label: "FORKS", value: formatCount(data.forks) },

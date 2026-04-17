@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { buildReceiptViewModel } from "@/lib/receipt";
+import { buildReceiptVariance } from "@/lib/render-variance";
 import { getReceiptModeDefinition } from "@/lib/receipt-modes";
 import { createQrDataUri } from "@/lib/qr";
 import { getSiteHost } from "@/lib/site";
@@ -14,12 +15,31 @@ interface ReceiptCardProps {
 
 export async function ReceiptCard({ data, className = "", mode = "fine-print" }: ReceiptCardProps) {
   const receipt = buildReceiptViewModel(data, mode);
+  const variance = buildReceiptVariance(data, mode);
   const modeDefinition = getReceiptModeDefinition(mode);
   const qrDataUri = await createQrDataUri(data.repoUrl);
   const siteHost = getSiteHost();
 
   return (
     <article className={`receipt-card paper-texture ${modeDefinition.cardClassName} px-6 py-7 ${className}`}>
+      <div className="pointer-events-none absolute inset-0">
+        <div className="paper-docket" style={{ top: 16, right: 16 }}>
+          {variance.docketLabel}
+        </div>
+        {variance.foldLines.map((foldLine) => (
+          <div key={foldLine} className="paper-fold-line" style={{ top: `${foldLine}px` }} />
+        ))}
+        <div
+          className={`paper-stamp paper-stamp-${variance.stampTone}`}
+          style={{
+            top: `${variance.stampTop}px`,
+            left: `${variance.stampLeft}px`,
+            width: `${variance.stampWidth}px`,
+          }}
+        >
+          {variance.stampLabel}
+        </div>
+      </div>
       <div className="relative z-10">
         <header className="text-center">
           <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--text-muted)]">
@@ -39,6 +59,18 @@ export async function ReceiptCard({ data, className = "", mode = "fine-print" }:
           <p className="mt-3 font-mono text-[12px] leading-5 text-[var(--text-muted)]">
             {receipt.description}
           </p>
+          {receipt.milestones.length > 0 ? (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {receipt.milestones.map((milestone) => (
+                <span
+                  key={milestone}
+                  className="inline-flex min-h-7 items-center border border-[var(--cr-stamp)] px-2.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--cr-stamp)]"
+                >
+                  {milestone}
+                </span>
+              ))}
+            </div>
+          ) : null}
         </section>
 
         <hr className="receipt-divider my-5" />

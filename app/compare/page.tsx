@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { CompareDisplayShell } from "@/components/compare/CompareDisplayShell";
 import { createProtectedComparePath } from "@/lib/api-signing";
 import { buildCompareGeneratePath, buildComparePath, type CompareRepoRef } from "@/lib/compare-routes";
+import { featuredCompares } from "@/lib/featured-compares";
 import { fetchRepoData, fetchRepoMetadata } from "@/lib/github";
 import { getReceiptFormat, getReceiptFormatDefinition } from "@/lib/receipt-formats";
 import { getReceiptMode, getReceiptModeDefinition } from "@/lib/receipt-modes";
@@ -24,17 +25,6 @@ interface ComparePageProps {
     format?: string;
   }>;
 }
-
-const samplePairs = [
-  {
-    left: { owner: "vercel", repo: "next.js" },
-    right: { owner: "facebook", repo: "react" },
-  },
-  {
-    left: { owner: "microsoft", repo: "vscode" },
-    right: { owner: "microsoft", repo: "TypeScript" },
-  },
-] as const;
 
 export async function generateMetadata({ searchParams }: ComparePageProps): Promise<Metadata> {
   const resolvedSearchParams = (await searchParams) ?? {};
@@ -201,20 +191,15 @@ function CompareLanding({
           <div className="border border-[var(--text-faint)] p-5">
             <p className="font-display text-2xl italic">Suggested tables</p>
             <div className="mt-5 space-y-4">
-              {samplePairs.map((pair) => (
+              {featuredCompares.map((pair) => (
                 <Link
-                  key={`${pair.left.owner}/${pair.left.repo}-${pair.right.owner}/${pair.right.repo}`}
+                  key={pair.id}
                   href={buildComparePath(pair.left, pair.right, mode, format)}
                   className="block border border-[var(--text-faint)] px-4 py-3 transition-colors hover:border-[var(--text-primary)] hover:bg-[var(--cr-stamp-light)]"
                 >
-                  <p className="font-display text-2xl italic">
-                    {pair.left.owner}/{pair.left.repo}
-                  </p>
-                  <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">
-                    vs
-                  </p>
-                  <p className="mt-2 font-display text-2xl italic">
-                    {pair.right.owner}/{pair.right.repo}
+                  <p className="font-display text-2xl italic">{pair.title}</p>
+                  <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                    {pair.subtitle}
                   </p>
                 </Link>
               ))}
@@ -280,6 +265,34 @@ async function CompareResult({
                   initialFormat={format}
                   compact
                 />
+              </div>
+            </div>
+            <div className="border border-[var(--text-faint)] p-4">
+              <p className="font-display text-xl italic">House Matchups</p>
+              <div className="mt-4 space-y-3">
+                {featuredCompares
+                  .filter(
+                    (entry) =>
+                      !(
+                        entry.left.owner === left.owner &&
+                        entry.left.repo === left.repo &&
+                        entry.right.owner === right.owner &&
+                        entry.right.repo === right.repo
+                      ),
+                  )
+                  .slice(0, 3)
+                  .map((entry) => (
+                    <Link
+                      key={entry.id}
+                      href={buildComparePath(entry.left, entry.right, mode, format)}
+                      className="block border border-[var(--text-faint)] px-4 py-3 transition-colors hover:border-[var(--text-primary)] hover:bg-[var(--cr-stamp-light)]"
+                    >
+                      <p className="font-display text-xl italic">{entry.title}</p>
+                      <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--text-muted)]">
+                        {entry.subtitle}
+                      </p>
+                    </Link>
+                  ))}
               </div>
             </div>
           </div>

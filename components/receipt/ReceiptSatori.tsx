@@ -2,6 +2,7 @@ import React from "react";
 
 import type { QrMatrix } from "@/lib/qr";
 import { buildReceiptViewModel } from "@/lib/receipt";
+import { buildReceiptVariance } from "@/lib/render-variance";
 import { getSiteHost } from "@/lib/site";
 import { resolveTokens } from "@/lib/tokens";
 import { truncateText } from "@/lib/transform";
@@ -19,6 +20,7 @@ const displayFamily = "Playfair Display";
 
 export function ReceiptSatori({ data, qrMatrix, theme = "light", mode = "fine-print" }: ReceiptSatoriProps) {
   const receipt = buildReceiptViewModel(data, mode);
+  const variance = buildReceiptVariance(data, mode);
   const tokens = resolveTokens(theme);
   const siteHost = getSiteHost();
   const frame = getModeFrame(mode, tokens);
@@ -28,6 +30,7 @@ export function ReceiptSatori({ data, qrMatrix, theme = "light", mode = "fine-pr
       style={{
         width: 480,
         minHeight: 1152,
+        position: "relative",
         display: "flex",
         flexDirection: "column",
         backgroundColor: frame.backgroundColor,
@@ -42,6 +45,19 @@ export function ReceiptSatori({ data, qrMatrix, theme = "light", mode = "fine-pr
         borderStyle: "solid",
       }}
     >
+      <PaperVarianceLayer
+        docketLabel={variance.docketLabel}
+        stampLabel={variance.stampLabel}
+        stampTone={variance.stampTone}
+        stampTop={variance.stampTop}
+        stampLeft={variance.stampLeft}
+        stampWidth={variance.stampWidth}
+        foldLines={variance.foldLines}
+        paperColor={frame.backgroundColor}
+        stampColor={tokens.stamp}
+        mutedColor={tokens.inkFaint}
+        dangerColor={tokens.danger}
+      />
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 20 }}>
         <div
           style={{
@@ -77,6 +93,32 @@ export function ReceiptSatori({ data, qrMatrix, theme = "light", mode = "fine-pr
         <div style={{ fontSize: 12, color: tokens.inkMuted, lineHeight: 1.55 }}>
           {truncateText(receipt.description, 108)}
         </div>
+        {receipt.milestones.length > 0 ? (
+          <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", marginTop: 14 }}>
+            {receipt.milestones.map((milestone, index) => (
+              <div
+                key={`${milestone}-${index}`}
+                style={{
+                  borderWidth: 1,
+                  borderStyle: "solid",
+                  borderColor: tokens.stamp,
+                  color: tokens.stamp,
+                  fontSize: 10,
+                  letterSpacing: 1.1,
+                  textTransform: "uppercase",
+                  paddingTop: 6,
+                  paddingRight: 8,
+                  paddingBottom: 6,
+                  paddingLeft: 8,
+                  marginRight: 8,
+                  marginTop: index > 1 ? 8 : 0,
+                }}
+              >
+                {milestone}
+              </div>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       <DashDivider color={tokens.inkFaint} />
@@ -229,6 +271,97 @@ export function ReceiptSatori({ data, qrMatrix, theme = "light", mode = "fine-pr
         <div style={{ fontSize: 11, color: tokens.inkMuted }}>{siteHost}</div>
       </div>
     </div>
+  );
+}
+
+function PaperVarianceLayer({
+  docketLabel,
+  stampLabel,
+  stampTone,
+  stampTop,
+  stampLeft,
+  stampWidth,
+  foldLines,
+  paperColor,
+  stampColor,
+  mutedColor,
+  dangerColor,
+}: {
+  docketLabel: string;
+  stampLabel: string;
+  stampTone: "stamp" | "muted" | "danger";
+  stampTop: number;
+  stampLeft: number;
+  stampWidth: number;
+  foldLines: number[];
+  paperColor: string;
+  stampColor: string;
+  mutedColor: string;
+  dangerColor: string;
+}) {
+  const resolvedStampColor = stampTone === "danger" ? dangerColor : stampTone === "muted" ? mutedColor : stampColor;
+
+  return (
+    <>
+      <div
+        style={{
+          position: "absolute",
+          top: 16,
+          right: 16,
+          borderWidth: 1,
+          borderStyle: "solid",
+          borderColor: mutedColor,
+          color: mutedColor,
+          fontSize: 10,
+          letterSpacing: 1.3,
+          paddingTop: 5,
+          paddingRight: 7,
+          paddingBottom: 5,
+          paddingLeft: 7,
+          textTransform: "uppercase",
+        }}
+      >
+        {docketLabel}
+      </div>
+      {foldLines.map((foldLine, index) => (
+        <div
+          key={`fold-${index}`}
+          style={{
+            position: "absolute",
+            top: foldLine,
+            left: 18,
+            right: 18,
+            height: 2,
+            backgroundColor: mutedColor,
+            opacity: 0.16,
+          }}
+        />
+      ))}
+      <div
+        style={{
+          position: "absolute",
+          top: stampTop,
+          left: stampLeft,
+          width: stampWidth,
+          borderWidth: 1,
+          borderStyle: "solid",
+          borderColor: resolvedStampColor,
+          color: resolvedStampColor,
+          fontSize: 11,
+          letterSpacing: 1.8,
+          textAlign: "center",
+          textTransform: "uppercase",
+          paddingTop: 8,
+          paddingRight: 10,
+          paddingBottom: 8,
+          paddingLeft: 10,
+          backgroundColor: paperColor,
+          opacity: 0.5,
+        }}
+      >
+        {stampLabel}
+      </div>
+    </>
   );
 }
 

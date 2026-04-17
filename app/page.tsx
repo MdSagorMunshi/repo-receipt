@@ -4,6 +4,8 @@ import { ReceiptThumbnail } from "@/components/ReceiptThumbnail";
 import { SiteHeader } from "@/components/SiteHeader";
 import { UrlInputForm } from "@/components/UrlInputForm";
 import { ReceiptDisplayShell } from "@/components/receipt/ReceiptDisplayShell";
+import { buildComparePath } from "@/lib/compare-routes";
+import { featuredCompares } from "@/lib/featured-compares";
 import { fetchRepoData } from "@/lib/github";
 import { buildReceiptVariantPath, getReceiptFormat, getReceiptFormatDefinition } from "@/lib/receipt-formats";
 import { getReceiptMode, getReceiptModeDefinition } from "@/lib/receipt-modes";
@@ -108,6 +110,29 @@ export default async function HomePage({
                   mode={mode}
                 />
               </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-14">
+          <div className="mb-5 flex items-center justify-between">
+            <p className="font-display text-2xl italic">Settle a classic table</p>
+            <p className="hidden font-mono text-xs uppercase tracking-[0.2em] text-[var(--text-muted)] sm:block">
+              Compare against the regulars
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {featuredCompares.map((entry) => (
+              <Link
+                key={entry.id}
+                href={buildComparePath(entry.left, entry.right, mode, format)}
+                className="border border-[var(--text-faint)] px-4 py-4 transition-colors hover:border-[var(--text-primary)] hover:bg-[var(--cr-stamp-light)]"
+              >
+                <p className="font-display text-2xl italic">{entry.title}</p>
+                <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                  {entry.subtitle}
+                </p>
+              </Link>
             ))}
           </div>
         </section>

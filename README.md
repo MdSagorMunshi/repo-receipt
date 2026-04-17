@@ -4,8 +4,8 @@
 
 **Every repo has a receipt.**
 
-[![Next.js](https://img.shields.io/badge/Next.js_15-000000?style=for-the-badge&logo=next.js&logoColor=green)](https://nextjs.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Next.js](https://img.shields.io/badge/Next.js_16-000000?style=for-the-badge&logo=next.js&logoColor=green)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript_Strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-1A1814?style=for-the-badge)](./LICENSE)
 
@@ -15,7 +15,7 @@
 
 ---
 
-repo-receipt transforms any public GitHub repository into a shareable, print-style receipt. Paste a repository URL and receive a structured record of its stars, forks, languages, contributors, commit history, and age — rendered as interactive HTML and a downloadable high-resolution PNG.
+repo-receipt transforms any public GitHub repository into a shareable, print-style receipt. Paste a repository URL and receive a structured record of its stars, forks, languages, contributors, commit history, and age — rendered as interactive HTML and a downloadable high-resolution PNG. V2 expands that core loop with receipt modes, multiple export formats, split-bill comparisons, milestone marks, and curated gallery collections.
 
 <div align="center">
   <img src="./public/hero-facebook-react.png" alt="repo-receipt hero" width="380" />
@@ -27,6 +27,11 @@ repo-receipt transforms any public GitHub repository into a shareable, print-sty
 
 - **Instant receipt generation** — paste any public GitHub repository URL and generate a receipt view immediately
 - **High-resolution PNG export** — download a print-ready image suitable for social previews, Open Graph cards, and README embeds
+- **Multiple receipt modes** — Fine Print, Thermal, Archive, and Ledger Noir
+- **Multiple output formats** — portrait receipt, square card, story card, and README strip
+- **Split-bill comparisons** — compare two public repositories on a shared check
+- **Deterministic milestone marks** — badges, notes, fortune lines, and paper variance derived from repo data
+- **Curated gallery collections** — grouped shelves such as Featured Marks, House Vintages, and Busy Line
 - **24-hour image caching** — generated receipts are cached via Upstash Redis to minimise API usage and maximise performance
 - **Light and dark presentation** — both modes are supported within the Fine Print visual system
 - **Open embeds** — public receipt images stay openly accessible; interactive downloads are signed
@@ -37,7 +42,7 @@ repo-receipt transforms any public GitHub repository into a shareable, print-sty
 
 | Layer | Technology |
 |---|---|
-| Framework | Next.js 15 App Router |
+| Framework | Next.js 16 App Router |
 | Language | TypeScript |
 | Styling | Tailwind CSS v4 |
 | Image Generation | Satori + sharp |
@@ -107,6 +112,16 @@ bun run test:satori # Satori renderer tests
 | [BUILD.md](./BUILD.md) | Installation, build pipeline, hosting, and deployment notes |
 | [CONTRIBUTING.md](./CONTRIBUTING.md) | Contributor workflow, renderer constraints, and PR guidelines |
 | [ROADMAP.md](./ROADMAP.md) | V2 product roadmap, feature pillars, and release sequencing |
+
+---
+
+## V2 Highlights
+
+- `Receipt modes`: switch the visual language without changing the underlying receipt logic
+- `Share formats`: generate square, story, and README-friendly variants from the same repo
+- `Compare route`: split the bill between two repositories at `/compare`
+- `Paper personality`: deterministic fold lines, docket labels, and low-ink stamps
+- `Collections`: gallery shelves organized by badges, age, activity, and issue state
 
 ---
 

@@ -6,6 +6,8 @@ import { UrlInputForm } from "@/components/UrlInputForm";
 import { ErrorReceipt } from "@/components/receipt/ErrorReceipt";
 import { ReceiptDisplayShell } from "@/components/receipt/ReceiptDisplayShell";
 import { createProtectedReceiptPath } from "@/lib/api-signing";
+import { buildComparePath, type CompareRepoRef } from "@/lib/compare-routes";
+import { getFeaturedCompareTargets } from "@/lib/featured-compares";
 import { fetchRepoData, fetchRepoMetadata } from "@/lib/github";
 import { buildGenerateVariantPath, buildReceiptVariantPath, getReceiptFormat } from "@/lib/receipt-formats";
 import { getReceiptMode } from "@/lib/receipt-modes";
@@ -175,6 +177,9 @@ function ReceiptPageContent({
   mode: ReceiptMode;
   format: ReceiptFormat;
 }) {
+  const currentRepo = { owner, repo } satisfies CompareRepoRef;
+  const compareTargets = getFeaturedCompareTargets(currentRepo).slice(0, 3);
+
   return (
     <div className="min-h-screen">
       <SiteHeader />
@@ -207,6 +212,26 @@ function ReceiptPageContent({
                   initialMode={mode}
                   initialFormat={format}
                 />
+              </div>
+            </div>
+            <div className="border border-[var(--text-faint)] p-4">
+              <p className="font-display text-xl italic">Compare This Repo</p>
+              <div className="mt-4 space-y-3">
+                {compareTargets.map((entry) => (
+                  <a
+                    key={`${entry.id}-${entry.target.owner}/${entry.target.repo}`}
+                    href={buildComparePath(currentRepo, entry.target, mode, format)}
+                    className="block border border-[var(--text-faint)] px-4 py-3 transition-colors hover:border-[var(--text-primary)] hover:bg-[var(--cr-stamp-light)]"
+                  >
+                    <p className="font-display text-xl italic">{entry.title}</p>
+                    <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--text-muted)]">
+                      {owner}/{repo} vs {entry.target.owner}/{entry.target.repo}
+                    </p>
+                    <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--text-faint)]">
+                      {entry.subtitle}
+                    </p>
+                  </a>
+                ))}
               </div>
             </div>
           </div>

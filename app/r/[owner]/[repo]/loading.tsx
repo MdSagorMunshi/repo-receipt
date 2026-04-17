@@ -45,6 +45,12 @@ export default function ReceiptLoading() {
           from { opacity: 0; transform: translateY(-6px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @media (prefers-reduced-motion: reduce) {
+          .loading-stage * {
+            animation: none !important;
+            transition: none !important;
+          }
+        }
       `}</style>
     </div>
   );

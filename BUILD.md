@@ -103,6 +103,7 @@ bun run start
 - The image generation route currently runs on Node.js because it uses `sharp`.
 - If Upstash Redis is not configured, the app still works but generates receipt PNGs on demand.
 - Set `NEXT_PUBLIC_SITE_URL` to the fully qualified deployed origin so README embeds and metadata resolve correctly.
+- V2 adds `/compare`, format variants, milestone-based gallery collections, and deterministic paper personality across both DOM and PNG outputs.
 
 ## Vercel
 

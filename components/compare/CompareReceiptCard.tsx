@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { buildCompareReceiptViewModel } from "@/lib/compare";
+import { buildCompareVariance } from "@/lib/render-variance";
 import { getReceiptModeDefinition } from "@/lib/receipt-modes";
 import { createQrDataUri } from "@/lib/qr";
 import { getSiteHost } from "@/lib/site";
@@ -22,12 +23,31 @@ export async function CompareReceiptCard({
   className = "",
 }: CompareReceiptCardProps) {
   const compare = buildCompareReceiptViewModel(left, right, mode);
+  const variance = buildCompareVariance(left, right, mode);
   const modeDefinition = getReceiptModeDefinition(mode);
   const qrDataUri = await createQrDataUri(compareUrl);
   const siteHost = getSiteHost();
 
   return (
     <article className={`compare-card paper-texture ${modeDefinition.cardClassName} px-6 py-7 ${className}`}>
+      <div className="pointer-events-none absolute inset-0">
+        <div className="paper-docket" style={{ top: 16, right: 16 }}>
+          {variance.docketLabel}
+        </div>
+        {variance.foldLines.map((foldLine) => (
+          <div key={foldLine} className="paper-fold-line" style={{ top: `${foldLine}px` }} />
+        ))}
+        <div
+          className={`paper-stamp paper-stamp-${variance.stampTone}`}
+          style={{
+            top: `${variance.stampTop}px`,
+            left: `${variance.stampLeft}px`,
+            width: `${variance.stampWidth}px`,
+          }}
+        >
+          {variance.stampLabel}
+        </div>
+      </div>
       <div className="relative z-10">
         <header className="text-center">
           <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text-muted)]">SPLIT-BILL</p>

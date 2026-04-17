@@ -182,6 +182,60 @@ button {
   pointer-events: none;
 }
 
+.paper-docket {
+  position: absolute;
+  z-index: 1;
+  border: 1px solid var(--text-faint);
+  padding: 5px 7px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  background: color-mix(in srgb, var(--surface-bg) 90%, transparent);
+}
+
+.paper-fold-line {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  z-index: 1;
+  height: 2px;
+  background:
+    linear-gradient(180deg, rgb(26 24 20 / 0.12), transparent),
+    linear-gradient(90deg, transparent, rgb(26 24 20 / 0.08), transparent);
+  opacity: 0.75;
+}
+
+.paper-stamp {
+  position: absolute;
+  z-index: 1;
+  border: 1px solid var(--cr-stamp);
+  padding: 8px 10px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-align: center;
+  opacity: 0.5;
+  background: color-mix(in srgb, var(--surface-bg) 92%, transparent);
+}
+
+.paper-stamp-stamp {
+  border-color: var(--cr-stamp);
+  color: var(--cr-stamp);
+}
+
+.paper-stamp-muted {
+  border-color: var(--text-faint);
+  color: var(--text-faint);
+}
+
+.paper-stamp-danger {
+  border-color: var(--cr-danger);
+  color: var(--cr-danger);
+}
+
 .receipt-mode-fine-print {
   background-color: var(--surface-bg);
 }
