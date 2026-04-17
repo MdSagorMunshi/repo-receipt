@@ -1,4 +1,6 @@
 export type ThemeMode = "light" | "dark";
+export type ReceiptMode = "fine-print" | "thermal" | "archive" | "ledger-noir";
+export type ReceiptFormat = "portrait" | "square" | "story" | "readme-strip";
 
 export interface LanguageEntry {
   name: string;

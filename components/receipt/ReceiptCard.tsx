@@ -1,26 +1,32 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { buildReceiptViewModel } from "@/lib/receipt";
+import { getReceiptModeDefinition } from "@/lib/receipt-modes";
 import { createQrDataUri } from "@/lib/qr";
 import { getSiteHost } from "@/lib/site";
-import type { RepoData } from "@/lib/types";
+import type { ReceiptMode, RepoData } from "@/lib/types";
 
 interface ReceiptCardProps {
   data: RepoData;
   className?: string;
+  mode?: ReceiptMode;
 }
 
-export async function ReceiptCard({ data, className = "" }: ReceiptCardProps) {
-  const receipt = buildReceiptViewModel(data);
+export async function ReceiptCard({ data, className = "", mode = "fine-print" }: ReceiptCardProps) {
+  const receipt = buildReceiptViewModel(data, mode);
+  const modeDefinition = getReceiptModeDefinition(mode);
   const qrDataUri = await createQrDataUri(data.repoUrl);
   const siteHost = getSiteHost();
 
   return (
-    <article className={`receipt-card paper-texture px-6 py-7 ${className}`}>
+    <article className={`receipt-card paper-texture ${modeDefinition.cardClassName} px-6 py-7 ${className}`}>
       <div className="relative z-10">
         <header className="text-center">
           <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--text-muted)]">
             REPO-RECEIPT
+          </p>
+          <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.24em] text-[var(--text-faint)]">
+            {receipt.modeLabel}
           </p>
           <p className="mt-3 font-mono text-xs tracking-[0.08em]">{receipt.receiptNumber}</p>
           <p className="mt-1 font-mono text-[11px] text-[var(--text-muted)]">{receipt.generatedAt}</p>
@@ -96,6 +102,16 @@ export async function ReceiptCard({ data, className = "" }: ReceiptCardProps) {
 
         <hr className="receipt-divider my-5" />
 
+        <section className="space-y-2.5">
+          {receipt.notes.map((note) => (
+            <p key={note} className="font-mono text-[11px] leading-5 text-[var(--text-muted)]">
+              {note}
+            </p>
+          ))}
+        </section>
+
+        <hr className="receipt-divider my-5" />
+
         <section className="space-y-1.5 font-mono text-[12px]">
           <p className="text-right">{receipt.subtotalLabel}</p>
           <p className="text-right text-[var(--cr-danger)]">{receipt.openIssuesLabel}</p>
@@ -104,7 +120,9 @@ export async function ReceiptCard({ data, className = "" }: ReceiptCardProps) {
         <hr className="receipt-divider my-5" />
 
         <footer className="text-center">
-          <p className="font-display text-[22px] italic tracking-[0.02em]">THANK YOU FOR OPEN SOURCING</p>
+          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">{receipt.serviceLine}</p>
+          <p className="mt-4 font-display text-[22px] italic tracking-[0.02em]">THANK YOU FOR OPEN SOURCING</p>
+          <p className="mt-3 font-mono text-[11px] leading-5 text-[var(--text-muted)]">{receipt.fortuneLine}</p>
           <div className="mt-5 flex justify-center">
             <div className="border border-[var(--cr-stamp)] p-2">
               <img src={qrDataUri} alt="" width={116} height={116} />

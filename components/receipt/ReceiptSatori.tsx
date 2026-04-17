@@ -5,21 +5,23 @@ import { buildReceiptViewModel } from "@/lib/receipt";
 import { getSiteHost } from "@/lib/site";
 import { resolveTokens } from "@/lib/tokens";
 import { truncateText } from "@/lib/transform";
-import type { RepoData, ThemeMode } from "@/lib/types";
+import type { ReceiptMode, RepoData, ThemeMode } from "@/lib/types";
 
 interface ReceiptSatoriProps {
   data: RepoData;
   qrMatrix: QrMatrix;
   theme?: ThemeMode;
+  mode?: ReceiptMode;
 }
 
 const monoFamily = "JetBrains Mono";
 const displayFamily = "Playfair Display";
 
-export function ReceiptSatori({ data, qrMatrix, theme = "light" }: ReceiptSatoriProps) {
-  const receipt = buildReceiptViewModel(data);
+export function ReceiptSatori({ data, qrMatrix, theme = "light", mode = "fine-print" }: ReceiptSatoriProps) {
+  const receipt = buildReceiptViewModel(data, mode);
   const tokens = resolveTokens(theme);
   const siteHost = getSiteHost();
+  const frame = getModeFrame(mode, tokens);
 
   return (
     <div
@@ -28,7 +30,7 @@ export function ReceiptSatori({ data, qrMatrix, theme = "light" }: ReceiptSatori
         minHeight: 1152,
         display: "flex",
         flexDirection: "column",
-        backgroundColor: tokens.paper,
+        backgroundColor: frame.backgroundColor,
         color: tokens.ink,
         paddingTop: 28,
         paddingRight: 24,
@@ -36,7 +38,7 @@ export function ReceiptSatori({ data, qrMatrix, theme = "light" }: ReceiptSatori
         paddingLeft: 24,
         fontFamily: monoFamily,
         borderWidth: 1,
-        borderColor: tokens.inkFaint,
+        borderColor: frame.borderColor,
         borderStyle: "solid",
       }}
     >
@@ -50,6 +52,9 @@ export function ReceiptSatori({ data, qrMatrix, theme = "light" }: ReceiptSatori
           }}
         >
           REPO-RECEIPT
+        </div>
+        <div style={{ fontSize: 10, letterSpacing: 2.4, textTransform: "uppercase", color: tokens.inkFaint, marginTop: 8 }}>
+          {receipt.modeLabel}
         </div>
         <div style={{ fontSize: 12, marginTop: 12 }}>{receipt.receiptNumber}</div>
         <div style={{ fontSize: 11, color: tokens.inkMuted, marginTop: 4 }}>{receipt.generatedAt}</div>
@@ -162,6 +167,24 @@ export function ReceiptSatori({ data, qrMatrix, theme = "light" }: ReceiptSatori
       <DashDivider color={tokens.inkFaint} />
 
       <div style={{ display: "flex", flexDirection: "column", marginTop: 18, marginBottom: 18 }}>
+        {receipt.notes.map((note, index) => (
+          <div
+            key={`${note}-${index}`}
+            style={{
+              fontSize: 11,
+              color: tokens.inkMuted,
+              lineHeight: 1.55,
+              marginBottom: index === receipt.notes.length - 1 ? 0 : 8,
+            }}
+          >
+            {note}
+          </div>
+        ))}
+      </div>
+
+      <DashDivider color={tokens.inkFaint} />
+
+      <div style={{ display: "flex", flexDirection: "column", marginTop: 18, marginBottom: 18 }}>
         <div style={{ fontSize: 12, textAlign: "right", marginBottom: 6 }}>{receipt.subtotalLabel}</div>
         <div style={{ fontSize: 12, textAlign: "right", color: tokens.danger }}>{receipt.openIssuesLabel}</div>
       </div>
@@ -169,17 +192,21 @@ export function ReceiptSatori({ data, qrMatrix, theme = "light" }: ReceiptSatori
       <DashDivider color={tokens.inkFaint} />
 
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 18 }}>
+        <div style={{ fontSize: 11, letterSpacing: 1.4, textTransform: "uppercase", color: tokens.inkMuted, marginBottom: 14 }}>
+          {receipt.serviceLine}
+        </div>
         <div
           style={{
             fontFamily: displayFamily,
             fontSize: 23,
             fontStyle: "italic",
             textAlign: "center",
-            marginBottom: 18,
+            marginBottom: 12,
           }}
         >
           THANK YOU FOR OPEN SOURCING
         </div>
+        <div style={{ fontSize: 11, color: tokens.inkMuted, marginBottom: 18, textAlign: "center" }}>{receipt.fortuneLine}</div>
         <div
           style={{
             width: 132,
@@ -295,4 +322,35 @@ function ReceiptSectionRows({
       ))}
     </div>
   );
+}
+
+function getModeFrame(
+  mode: ReceiptMode,
+  tokens: ReturnType<typeof resolveTokens>,
+): { backgroundColor: string; borderColor: string } {
+  if (mode === "thermal") {
+    return {
+      backgroundColor: "#fbf3df",
+      borderColor: tokens.stamp,
+    };
+  }
+
+  if (mode === "archive") {
+    return {
+      backgroundColor: "#f2f3e7",
+      borderColor: "#9aa08b",
+    };
+  }
+
+  if (mode === "ledger-noir") {
+    return {
+      backgroundColor: "#f8efe1",
+      borderColor: "#8d7436",
+    };
+  }
+
+  return {
+    backgroundColor: tokens.paper,
+    borderColor: tokens.inkFaint,
+  };
 }

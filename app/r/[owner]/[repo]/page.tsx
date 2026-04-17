@@ -4,12 +4,14 @@ import { ActionPanel } from "@/components/ActionPanel";
 import { SiteHeader } from "@/components/SiteHeader";
 import { UrlInputForm } from "@/components/UrlInputForm";
 import { ErrorReceipt } from "@/components/receipt/ErrorReceipt";
-import { ReceiptCard } from "@/components/receipt/ReceiptCard";
+import { ReceiptDisplayShell } from "@/components/receipt/ReceiptDisplayShell";
 import { createProtectedReceiptPath } from "@/lib/api-signing";
 import { fetchRepoData, fetchRepoMetadata } from "@/lib/github";
+import { buildGenerateVariantPath, buildReceiptVariantPath, getReceiptFormat } from "@/lib/receipt-formats";
+import { getReceiptMode } from "@/lib/receipt-modes";
 import { getAppName, getSiteUrl } from "@/lib/site";
 import { formatAgeLabel, truncateText } from "@/lib/transform";
-import { RepoFetchError } from "@/lib/types";
+import { ReceiptFormat, ReceiptMode, RepoFetchError } from "@/lib/types";
 
 export const revalidate = 86400;
 
@@ -18,14 +20,23 @@ interface ReceiptPageProps {
     owner: string;
     repo: string;
   }>;
+  searchParams?: Promise<{
+    mode?: string;
+    format?: string;
+  }>;
 }
 
-export async function generateMetadata({ params }: ReceiptPageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: ReceiptPageProps): Promise<Metadata> {
   const { owner, repo } = await params;
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const mode = getReceiptMode(resolvedSearchParams.mode);
+  const format = getReceiptFormat(resolvedSearchParams.format);
   const appName = getAppName();
 
   try {
     const metadata = await fetchRepoMetadata(owner, repo);
+
+    const imagePath = buildGenerateVariantPath(owner, repo, mode, format);
 
     return {
       title: `${metadata.fullName} on ${appName}`,
@@ -33,13 +44,13 @@ export async function generateMetadata({ params }: ReceiptPageProps): Promise<Me
       openGraph: {
         title: `${metadata.fullName} on ${appName}`,
         description: truncateText(metadata.description, 160),
-        images: [`/api/generate/${owner}/${repo}`],
+        images: [imagePath],
       },
       twitter: {
         card: "summary_large_image",
         title: `${metadata.fullName} on ${appName}`,
         description: truncateText(metadata.description, 160),
-        images: [`/api/generate/${owner}/${repo}`],
+        images: [imagePath],
       },
     };
   } catch {
@@ -50,9 +61,12 @@ export async function generateMetadata({ params }: ReceiptPageProps): Promise<Me
   }
 }
 
-export default async function ReceiptPage({ params }: ReceiptPageProps) {
+export default async function ReceiptPage({ params, searchParams }: ReceiptPageProps) {
   const { owner, repo } = await params;
   const siteUrl = getSiteUrl();
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const mode = getReceiptMode(resolvedSearchParams.mode);
+  const format = getReceiptFormat(resolvedSearchParams.format);
   let data: Awaited<ReturnType<typeof fetchRepoData>> | null = null;
   let fetchError: unknown = null;
 
@@ -123,12 +137,25 @@ export default async function ReceiptPage({ params }: ReceiptPageProps) {
     );
   }
 
-  const imageUrl = new URL(`/api/generate/${owner}/${repo}`, siteUrl).toString();
-  const receiptUrl = new URL(`/r/${owner}/${repo}`, siteUrl).toString();
-  const downloadPath = createProtectedReceiptPath(owner, repo);
+  const imageUrl = new URL(
+    buildGenerateVariantPath(owner, repo, mode, format),
+    siteUrl,
+  ).toString();
+  const receiptUrl = new URL(buildReceiptVariantPath(owner, repo, mode, format), siteUrl).toString();
+  const downloadPath = createProtectedReceiptPath(owner, repo, mode, format);
   const embedCode = `[![repo-receipt](${imageUrl})](${receiptUrl})`;
 
-  return <ReceiptPageContent data={data} owner={owner} repo={repo} embedCode={embedCode} downloadPath={downloadPath} />;
+  return (
+    <ReceiptPageContent
+      data={data}
+      owner={owner}
+      repo={repo}
+      embedCode={embedCode}
+      downloadPath={downloadPath}
+      mode={mode}
+      format={format}
+    />
+  );
 }
 
 function ReceiptPageContent({
@@ -137,19 +164,23 @@ function ReceiptPageContent({
   repo,
   embedCode,
   downloadPath,
+  mode,
+  format,
 }: {
   data: Awaited<ReturnType<typeof fetchRepoData>>;
   owner: string;
   repo: string;
   embedCode: string;
   downloadPath: string;
+  mode: ReceiptMode;
+  format: ReceiptFormat;
 }) {
   return (
     <div className="min-h-screen">
       <SiteHeader />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid gap-10 xl:grid-cols-[480px_minmax(320px,420px)] xl:justify-center">
-          <ReceiptCard data={data} />
+        <div className="grid gap-10 xl:grid-cols-[minmax(0,680px)_minmax(320px,420px)] xl:justify-center">
+          <ReceiptDisplayShell data={data} mode={mode} format={format} />
           <div className="flex flex-col gap-6">
             <ActionPanel
               owner={owner}
@@ -158,6 +189,8 @@ function ReceiptPageContent({
               commitCount={data.totalCommits}
               repoAgeLabel={formatAgeLabel(data.repoAge)}
               downloadPath={downloadPath}
+              mode={mode}
+              format={format}
             />
             <div className="border border-[var(--text-faint)] p-4">
               <p className="font-display text-xl italic">README Embed</p>
@@ -168,7 +201,12 @@ function ReceiptPageContent({
             <div className="border border-[var(--text-faint)] p-4">
               <p className="font-display text-xl italic">Generate another</p>
               <div className="mt-4">
-                <UrlInputForm initialValue={`${owner}/${repo}`} compact />
+                <UrlInputForm
+                  initialValue={`${owner}/${repo}`}
+                  compact
+                  initialMode={mode}
+                  initialFormat={format}
+                />
               </div>
             </div>
           </div>

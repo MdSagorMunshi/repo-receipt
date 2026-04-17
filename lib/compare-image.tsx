@@ -5,7 +5,7 @@ import React from "react";
 import satori from "satori";
 import sharp from "sharp";
 
-import { ReceiptSatori } from "@/components/receipt/ReceiptSatori";
+import { CompareReceiptSatori } from "@/components/compare/CompareReceiptSatori";
 import { createQrMatrix } from "@/lib/qr";
 import type { ReceiptFormat, ReceiptMode, RepoData } from "@/lib/types";
 
@@ -50,49 +50,34 @@ async function loadReceiptFonts() {
   return fontCache;
 }
 
-export async function renderReceiptPng(
-  data: RepoData,
+export async function renderComparePng(
+  left: RepoData,
+  right: RepoData,
+  compareUrl: string,
   mode: ReceiptMode = "fine-print",
   format: ReceiptFormat = "portrait",
 ) {
   const [fonts, qrMatrix] = await Promise.all([
     loadReceiptFonts(),
-    Promise.resolve(createQrMatrix(data.repoUrl)),
+    Promise.resolve(createQrMatrix(compareUrl)),
   ]);
 
-  const svg = await satori(<ReceiptSatori data={data} qrMatrix={qrMatrix} mode={mode} />, {
-    width: 480,
-    height: 1152,
-    fonts: [
-      {
-        name: "JetBrains Mono",
-        data: fonts.jetbrains,
-        weight: 400,
-        style: "normal",
-      },
-      {
-        name: "JetBrains Mono",
-        data: fonts.jetbrainsMedium,
-        weight: 500,
-        style: "normal",
-      },
-      {
-        name: "Playfair Display",
-        data: fonts.playfairBold,
-        weight: 700,
-        style: "normal",
-      },
-      {
-        name: "Playfair Display",
-        data: fonts.playfairItalic,
-        weight: 700,
-        style: "italic",
-      },
-    ],
-  });
+  const svg = await satori(
+    <CompareReceiptSatori left={left} right={right} qrMatrix={qrMatrix} mode={mode} />,
+    {
+      width: 760,
+      height: 1220,
+      fonts: [
+        { name: "JetBrains Mono", data: fonts.jetbrains, weight: 400, style: "normal" },
+        { name: "JetBrains Mono", data: fonts.jetbrainsMedium, weight: 500, style: "normal" },
+        { name: "Playfair Display", data: fonts.playfairBold, weight: 700, style: "normal" },
+        { name: "Playfair Display", data: fonts.playfairItalic, weight: 700, style: "italic" },
+      ],
+    },
+  );
 
   const portraitPng = await sharp(Buffer.from(svg))
-    .resize({ width: 960 })
+    .resize({ width: 1520 })
     .png({ compressionLevel: 9, effort: 10 })
     .toBuffer();
 
@@ -108,9 +93,9 @@ async function renderFormattedVariant(portraitPng: Buffer, format: ReceiptFormat
     return buildCompositeCanvas(portraitPng, {
       width: 1080,
       height: 1080,
-      receiptWidth: 410,
-      receiptLeft: 335,
-      receiptTop: 72,
+      receiptWidth: 720,
+      receiptLeft: 180,
+      receiptTop: 44,
       background: "#f2ede0",
       accent: "#e0d5bd",
       accentWidth: 6,
@@ -121,9 +106,9 @@ async function renderFormattedVariant(portraitPng: Buffer, format: ReceiptFormat
     return buildCompositeCanvas(portraitPng, {
       width: 1080,
       height: 1920,
-      receiptWidth: 620,
-      receiptLeft: 230,
-      receiptTop: 132,
+      receiptWidth: 820,
+      receiptLeft: 130,
+      receiptTop: 92,
       background: "#eee5d4",
       accent: "#d7c8a7",
       accentWidth: 8,
@@ -133,9 +118,9 @@ async function renderFormattedVariant(portraitPng: Buffer, format: ReceiptFormat
   return buildCompositeCanvas(portraitPng, {
     width: 1600,
     height: 900,
-    receiptWidth: 330,
-    receiptLeft: 140,
-    receiptTop: 68,
+    receiptWidth: 760,
+    receiptLeft: 72,
+    receiptTop: 92,
     background: "#f3eee4",
     accent: "#cbbd9d",
     accentWidth: 10,
@@ -164,9 +149,7 @@ async function buildCompositeCanvas(
     accentWidth: number;
   },
 ) {
-  const receipt = await sharp(portraitPng)
-    .resize({ width: receiptWidth })
-    .toBuffer();
+  const receipt = await sharp(portraitPng).resize({ width: receiptWidth }).toBuffer();
 
   const accentSvg = Buffer.from(`
     <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">

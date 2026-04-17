@@ -1,8 +1,9 @@
-import { verifyProtectedReceiptSignature } from "@/lib/api-signing";
+import { verifyProtectedCompareSignature } from "@/lib/api-signing";
 import { applyRateLimit } from "@/lib/rate-limit";
+import { parseRepoUrl } from "@/lib/transform";
+import { generateComparePng } from "@/lib/compare-service";
 import { getReceiptFormat } from "@/lib/receipt-formats";
 import { getReceiptMode } from "@/lib/receipt-modes";
-import { generateReceiptPng } from "@/lib/receipt-service";
 import { getClientIp, isAllowedProtectedClient } from "@/lib/request-security";
 import { RepoFetchError } from "@/lib/types";
 
@@ -20,18 +21,16 @@ function privateHeaders(rateLimit: Awaited<ReturnType<typeof applyRateLimit>>) {
   };
 }
 
-export async function GET(
-  request: Request,
-  context: { params: Promise<{ owner: string; repo: string }> },
-) {
-  const { owner, repo } = await context.params;
+export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
+  const left = parseRepoUrl(requestUrl.searchParams.get("left") ?? "");
+  const right = parseRepoUrl(requestUrl.searchParams.get("right") ?? "");
   const mode = getReceiptMode(requestUrl.searchParams.get("mode"));
   const format = getReceiptFormat(requestUrl.searchParams.get("format"));
-  const rateLimit = await applyRateLimit("protected-receipt", getClientIp(request), PROTECTED_LIMIT);
+  const rateLimit = await applyRateLimit("protected-compare", getClientIp(request), PROTECTED_LIMIT);
 
   if (!rateLimit.allowed) {
-    return new Response("Receipt download limit reached. Try again later.", {
+    return new Response("Compare download limit reached. Try again later.", {
       status: 429,
       headers: {
         "Retry-After": String(rateLimit.retryAfter),
@@ -42,31 +41,38 @@ export async function GET(
     });
   }
 
+  if (!left || !right) {
+    return new Response("Two valid repos are required for compare download.", {
+      status: 400,
+      headers: privateHeaders(rateLimit),
+    });
+  }
+
   if (
-    !verifyProtectedReceiptSignature(
-      owner,
-      repo,
+    !verifyProtectedCompareSignature(
+      left,
+      right,
       requestUrl.searchParams.get("expires"),
       requestUrl.searchParams.get("sig"),
       requestUrl.searchParams.get("mode"),
       requestUrl.searchParams.get("format"),
     )
   ) {
-    return new Response("Invalid or expired receipt signature.", {
+    return new Response("Invalid or expired compare signature.", {
       status: 403,
       headers: privateHeaders(rateLimit),
     });
   }
 
   if (!isAllowedProtectedClient(request)) {
-    return new Response("Protected receipt downloads require an in-browser request from repo-receipt.", {
+    return new Response("Protected compare downloads require an in-browser request from repo-receipt.", {
       status: 403,
       headers: privateHeaders(rateLimit),
     });
   }
 
   try {
-    const png = await generateReceiptPng(owner, repo, mode, format, process.env.NODE_ENV === "development");
+    const png = await generateComparePng(left, right, mode, format, process.env.NODE_ENV === "development");
 
     return new Response(new Uint8Array(png), {
       status: 200,
@@ -83,8 +89,8 @@ export async function GET(
       });
     }
 
-    console.error("repo-receipt protected image generation failed", error);
-    return new Response("Receipt rendering failed.", {
+    console.error("repo-receipt protected compare image generation failed", error);
+    return new Response("Compare rendering failed.", {
       status: 500,
       headers: privateHeaders(rateLimit),
     });

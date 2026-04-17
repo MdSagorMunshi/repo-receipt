@@ -3,8 +3,10 @@ import Link from "next/link";
 import { ReceiptThumbnail } from "@/components/ReceiptThumbnail";
 import { SiteHeader } from "@/components/SiteHeader";
 import { UrlInputForm } from "@/components/UrlInputForm";
-import { ReceiptCard } from "@/components/receipt/ReceiptCard";
+import { ReceiptDisplayShell } from "@/components/receipt/ReceiptDisplayShell";
 import { fetchRepoData } from "@/lib/github";
+import { buildReceiptVariantPath, getReceiptFormat, getReceiptFormatDefinition } from "@/lib/receipt-formats";
+import { getReceiptMode, getReceiptModeDefinition } from "@/lib/receipt-modes";
 import { sampleRepoData } from "@/lib/sample-data";
 import type { RepoData } from "@/lib/types";
 
@@ -30,7 +32,16 @@ async function getRepoOrFallback(owner: string, repo: string, fallback: RepoData
   }
 }
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ mode?: string; format?: string }>;
+}) {
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const mode = getReceiptMode(resolvedSearchParams.mode);
+  const format = getReceiptFormat(resolvedSearchParams.format);
+  const modeDefinition = getReceiptModeDefinition(mode);
+  const formatDefinition = getReceiptFormatDefinition(format);
   const heroReceipt = await getRepoOrFallback("facebook", "react", sampleRepoData);
   const examples = await Promise.all(
     exampleRepos.map((entry) => getRepoOrFallback(entry.owner, entry.repo, sampleRepoData)),
@@ -52,10 +63,17 @@ export default async function HomePage() {
               Paste any public GitHub repository and get a print-worthy record of its stars, commits,
               languages, contributors, age, and open-source footprint.
             </p>
+            <p className="mt-4 max-w-2xl font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">
+              Active mode: {modeDefinition.label} · {modeDefinition.kicker} · {formatDefinition.label}
+            </p>
             <div className="mt-10 max-w-3xl">
-              <UrlInputForm />
+              <UrlInputForm initialMode={mode} initialFormat={format} />
             </div>
             <div className="mt-10 flex items-center gap-4 font-mono text-xs text-[var(--text-muted)]">
+              <Link href="/compare" className="underline decoration-[var(--text-faint)] underline-offset-4">
+                Split-bill compare
+              </Link>
+              <span>·</span>
               <Link href="/gallery" className="underline decoration-[var(--text-faint)] underline-offset-4">
                 Most decorated repos
               </Link>
@@ -67,8 +85,8 @@ export default async function HomePage() {
           </div>
 
           <div className="order-1 flex justify-center lg:order-2 lg:justify-end">
-            <div className="w-full max-w-[540px]" style={{ transform: "rotate(3deg)" }}>
-              <ReceiptCard data={heroReceipt} />
+            <div className="w-full max-w-[680px]">
+              <ReceiptDisplayShell data={heroReceipt} mode={mode} format={format} />
             </div>
           </div>
         </section>
@@ -84,9 +102,10 @@ export default async function HomePage() {
             {examples.map((repo) => (
               <div key={repo.fullName} className="min-w-[210px] max-w-[210px] flex-none">
                 <ReceiptThumbnail
-                  href={`/r/${repo.owner}/${repo.name}`}
+                  href={buildReceiptVariantPath(repo.owner, repo.name, mode, format)}
                   data={repo}
                   label={repo.fullName}
+                  mode={mode}
                 />
               </div>
             ))}

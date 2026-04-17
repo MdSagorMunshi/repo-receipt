@@ -1,7 +1,8 @@
 import { applyRateLimit } from "@/lib/rate-limit";
+import { parseRepoUrl } from "@/lib/transform";
+import { generateComparePng } from "@/lib/compare-service";
 import { getReceiptFormat } from "@/lib/receipt-formats";
 import { getReceiptMode } from "@/lib/receipt-modes";
-import { generateReceiptPng } from "@/lib/receipt-service";
 import { getClientIp } from "@/lib/request-security";
 import { RepoFetchError } from "@/lib/types";
 
@@ -19,19 +20,17 @@ function cacheHeaders(rateLimit: Awaited<ReturnType<typeof applyRateLimit>>) {
   };
 }
 
-export async function GET(
-  request: Request,
-  context: { params: Promise<{ owner: string; repo: string }> },
-) {
-  const { owner, repo } = await context.params;
+export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
-  const skipCache = process.env.NODE_ENV === "development" || requestUrl.searchParams.has("fresh");
+  const left = parseRepoUrl(requestUrl.searchParams.get("left") ?? "");
+  const right = parseRepoUrl(requestUrl.searchParams.get("right") ?? "");
   const mode = getReceiptMode(requestUrl.searchParams.get("mode"));
   const format = getReceiptFormat(requestUrl.searchParams.get("format"));
-  const rateLimit = await applyRateLimit("public-generate", getClientIp(request), PUBLIC_LIMIT);
+  const skipCache = process.env.NODE_ENV === "development" || requestUrl.searchParams.has("fresh");
+  const rateLimit = await applyRateLimit("public-compare", getClientIp(request), PUBLIC_LIMIT);
 
   if (!rateLimit.allowed) {
-    return new Response("Public receipt image limit reached. Try again later.", {
+    return new Response("Public compare image limit reached. Try again later.", {
       status: 429,
       headers: {
         "Retry-After": String(rateLimit.retryAfter),
@@ -42,8 +41,15 @@ export async function GET(
     });
   }
 
+  if (!left || !right) {
+    return new Response("Two valid repos are required for compare output.", {
+      status: 400,
+      headers: cacheHeaders(rateLimit),
+    });
+  }
+
   try {
-    const png = await generateReceiptPng(owner, repo, mode, format, skipCache);
+    const png = await generateComparePng(left, right, mode, format, skipCache);
 
     return new Response(new Uint8Array(png), {
       status: 200,
@@ -62,8 +68,8 @@ export async function GET(
       });
     }
 
-    console.error("repo-receipt image generation failed", error);
-    return new Response("Receipt rendering failed.", {
+    console.error("repo-receipt compare image generation failed", error);
+    return new Response("Compare rendering failed.", {
       status: 500,
       headers: {
         "X-RateLimit-Limit": String(rateLimit.limit),
